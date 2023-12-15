@@ -1,10 +1,16 @@
 import visualise
 import pandas as pd
-from sklearn.model_selection import train_test_split
 from sklearn.linear_model import LinearRegression
+from sklearn.model_selection import train_test_split
 from sklearn.metrics import mean_squared_error
+from sklearn.linear_model import LinearRegression
+from sklearn.model_selection import train_test_split
+from sklearn.metrics import mean_squared_error
+from sklearn.preprocessing import StandardScaler
+from sklearn.neighbors import LocalOutlierFactor
 
-DISPLAY = False
+
+DISPLAY = True
 FILE_LOC = r"insurance.csv"
 
 
@@ -27,6 +33,18 @@ if __name__ == '__main__':
     y = df['charges']
 
     X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
+
+    scaler = StandardScaler()
+    X_train = scaler.fit_transform(X_train)
+    X_test = scaler.transform(X_test)
+
+    # Outlier detection using Local Outlier Factor (LOF)
+    lof = LocalOutlierFactor(n_neighbors=20, contamination=0.1)
+    outlier_labels = lof.fit_predict(X_train)
+
+    # Filtering outliers from the training set
+    X_train = X_train[outlier_labels != -1]
+    y_train = y_train[outlier_labels != -1]
 
     # Initialize and train a model (example: Logistic Regression)
     model = LinearRegression()
